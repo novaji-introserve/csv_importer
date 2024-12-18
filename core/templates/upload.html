@@ -37,6 +37,23 @@
                 <p id="progress-text" class="text-sm text-gray-600 text-center">Uploading...</p>
             </div>
             
+            <!-- Yellow Warning Banner -->
+            <div class="max-w-2xl mx-auto">
+                <!-- Collapsible Warning Toggle Button (outside the warning banner) -->
+                <button id="toggle-warning" class="text-sm text-yellow-700 hover:text-yellow-900 mb-2">
+                    ⚠️ Show Important Upload Guidance
+                </button>
+            
+                <!-- Yellow Warning Banner (hidden by default) -->
+                <div id="warning-content" class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6 hidden" role="alert">
+                    <p class="font-bold">Important Upload Guidance</p>
+                    <p>
+                        ⚠️ Please ensure you use <strong>only the predefined header columns</strong> provided for this upload. 
+                        Deviating from the expected column structure will cause the upload to fail.
+                    </p>
+                </div>
+                   
+
             <div>
                 <button type="submit" 
                         class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
@@ -76,6 +93,22 @@ document.addEventListener('DOMContentLoaded', function() {
     const modalTitle = document.getElementById('modal-title');
     const modalMessage = document.getElementById('modal-message');
     const modalClose = document.getElementById('modal-close');
+    const toggleButton = document.getElementById('toggle-warning');
+    const warningContent = document.getElementById('warning-content');
+
+    // Toggle the visibility of the warning content
+    toggleButton.addEventListener('click', function() {
+        // Check if the content is currently visible
+        if (warningContent.classList.contains('hidden')) {
+            // If hidden, show the content and change the button text
+            warningContent.classList.remove('hidden');
+            toggleButton.textContent = '⚠️ Hide Important Upload Guidance';
+        } else {
+            // If visible, hide the content and change the button text
+            warningContent.classList.add('hidden');
+            toggleButton.textContent = '⚠️ Show Important Upload Guidance';
+        }
+    });
 
     // File name display
     fileInput.addEventListener('change', function() {
