@@ -61,9 +61,17 @@ class CSVImportView(APIView):
                     {'error': 'No file provided'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
+            
 
             file = request.FILES['file']
             table_name: Union[str, None] = request.data.get('table_name')
+            file_name =  file.name.lower()
+            
+            if not (file_name.endswith('.csv') or file_name.endswith('.xls') or file_name.endswith('.xlsx')):
+                return Response(
+                    {'error': 'Invalid file type. Only CSV and Excel files are allowed.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
             # Validate table_name
             if table_name not in ['civil_servant', 'repayment', 'loan_details']:

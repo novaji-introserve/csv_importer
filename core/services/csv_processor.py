@@ -56,7 +56,7 @@ class CSVProcessor:
             "NetPayment": "net_payment",
             "CivilServantCategory": "civil_servant_type_id",
             "Net Payment Month": "net_payment_month",
-            "Email Address": "net_payment_month",
+            "Email Address": "email_address",
         }
         self.loan_details_column_map = {
             "Tenor": "loan_tenor",
@@ -578,7 +578,7 @@ class CSVProcessor:
                     if 'disbursement_dates' in data.columns:
                         data['disbursement_dates'] = data['disbursement_dates'].replace('', None)
                         data.loc[data['disbursement_dates'] == '', 'disbursement_dates'] = None
-                        logger.info(f"Disbursement d`ates unique values: {data['disbursement_dates'].unique()}")
+                        logger.info(f"Disbursement dates unique values: {data['disbursement_dates'].unique()}")
 
                 # Bulk insert
                 try:
