@@ -1,2 +1,10 @@
 venv/
 __pycache__/
+static/
+media/
+**/.venv/
+.venv/
+*.log
+*.python-version
+*.pid
+staticfiles/

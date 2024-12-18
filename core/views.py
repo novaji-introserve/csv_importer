@@ -8,7 +8,14 @@ from .tasks import process_csv_import
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework.request import Request
-from typing import Union 
+from typing import Union
+from django.shortcuts import render
+import logging
+logger = logging.getLogger('import_app')
+
+def upload_page(request):
+    """Render the HTML page for file upload."""
+    return render(request, 'upload.html')
 
 class CSVImportView(APIView):
     @swagger_auto_schema(
@@ -80,8 +87,8 @@ class CSVImportView(APIView):
             # Create import log
             import_log = ImportLog.objects.create(
                 file_name=file.name,
-                table_name=table_name,  # table_name is now guaranteed to be a valid string
-                created_by=request.user.id,
+                table_name=table_name,
+                # created_by=request.user.id,
                 total_records=0
             )
 
