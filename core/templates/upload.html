@@ -4,7 +4,7 @@
     <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
         <h1 class="text-2xl font-bold mb-6">CSV Data Import</h1>
         
-        <form id="uploadForm" class="space-y-6" enctype="multipart/form-data">
+        <form id="uploadForm" class="space-y-6" enctype="multipart/form-data" novalidate>
             {% csrf_token %}
             <div>
                 <label class="block text-gray-700 text-sm font-bold mb-2" for="table_name">
@@ -40,7 +40,7 @@
             <!-- Yellow Warning Banner -->
             <div class="max-w-2xl mx-auto">
                 <!-- Collapsible Warning Toggle Button (outside the warning banner) -->
-                <button id="toggle-warning" class="text-sm text-yellow-700 hover:text-yellow-900 mb-2">
+                <button type="button" id="toggle-warning" class="text-sm text-yellow-700 hover:text-yellow-900 mb-2">
                     ⚠️ Show Important Upload Guidance
                 </button>
             
@@ -52,7 +52,7 @@
                         Deviating from the expected column structure will cause the upload to fail.
                     </p>
                 </div>
-                   
+            </div>
 
             <div>
                 <button type="submit" 
@@ -137,7 +137,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const formData = new FormData(form);
         
-        // Validate inputs
+        // Validate inputs only on form submission
         if (!fileInput.files.length) {
             showModal('error', 'Upload Failed', 'Please select a file to upload.');
             return;
@@ -176,7 +176,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await response.json();
             
             if (response.ok) {
-                {% comment %} showModal('success', 'Upload Successful', `Import initiated. Import ID: ${data.import_id}`); {% endcomment %}
                 showModal('success', 'Upload Successful', 'Your data should reflect in the app in a few moment');
                 progressText.textContent = 'Upload complete!';
                 progressBar.style.width = '100%';
@@ -186,7 +185,6 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (error) {
             showModal('error', 'Upload Failed', error.message);
         } finally {
-            // Optional: hide progress after a delay
             setTimeout(() => {
                 progressContainer.classList.add('hidden');
             }, 3000);
