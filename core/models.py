@@ -25,7 +25,7 @@ class ImportLog(models.Model):
     error_message = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
     completed_at = models.DateTimeField(null=True, blank=True)
-    created_by = models.IntegerField()  # User ID who initiated import
+    # created_by = models.IntegerField()  # User ID who initiated import
 
     class Meta:
         indexes = [

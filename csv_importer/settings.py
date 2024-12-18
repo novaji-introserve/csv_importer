@@ -35,7 +35,7 @@ SECRET_KEY = 'django-insecure-f0d-b)pxe+pivait(37c&nne3ffic%p04@al2he@1)*6*$ye-+
 DEBUG = True
 
 # ALLOWED_HOSTS = []
-ALLOWED_HOSTS: List[str] = []
+ALLOWED_HOSTS: List[str] = ['138.3.249.59', '127.0.0.1', 'localhost']
 
 
 # Application definition
@@ -66,11 +66,12 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'csv_importer.urls'
+# BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'core/templates')], 
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -83,40 +84,79 @@ TEMPLATES = [
     },
 ]
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/1',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
+}
+
+
 WSGI_APPLICATION = 'csv_importer.wsgi.application'
 
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'HOST': os.getenv('DB_HOST', 'localhost'),
+        'PORT': os.getenv('DB_PORT', '5432'),
+        'NAME': os.getenv('DB_NAME', 'lapo_loan_circulator'),
+        'USER': os.getenv('DB_USER', 'lapo_admin'),
+        'PASSWORD': os.getenv('DB_PASSWORD', 'lapo_admin'),
     }
 }
 
-DB_CONFIG = {
-    'host': os.getenv('DB_HOST', 'localhost'),
-    'database': os.getenv('DB_NAME', 'lapo_loan_circulator'),
-    'user': os.getenv('DB_USER', 'lapo_admin'),
-    'password': os.getenv('DB_PASSWORD', 'lapo_admin')
-}
-
 # Logging Configuration
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': False,
+#     'handlers': {
+#         'file': {
+#             'level': 'DEBUG',
+#             'class': 'logging.FileHandler',
+#             'filename': 'csv_import_errors.log',
+#         },
+#     },
+#     'loggers': {
+#         'import_app': {
+#             'handlers': ['file'],
+#             'level': 'DEBUG',
+#             'propagate': True,
+#         },
+#     },
+# }
 LOGGING = {
     'version': 1,
+    'disable_existing_loggers': False,
     'handlers': {
         'file': {
-            'level': 'ERROR',
+            'level': 'DEBUG',  # This captures all log levels: DEBUG, INFO, WARNING, ERROR
             'class': 'logging.FileHandler',
-            'filename': 'csv_import_errors.log',
+            'filename': os.path.join(BASE_DIR, 'csv_import_errors.log'),
         },
     },
     'loggers': {
-        'import_app': {
+        'import_app': {  # Logger for your app, named 'import_app'
             'handlers': ['file'],
-            'level': 'ERROR',
+            'level': 'DEBUG',  # Captures all log levels
+            'propagate': True,
+        },
+        'django': {  # Capture logs from Django itself (for example, SQL queries, etc.)
+            'handlers': ['file'],
+            'level': 'INFO',  # Info level for general Django logs (you can change this as needed)
             'propagate': True,
         },
     },
@@ -157,7 +197,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+# STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = '/var/www/html/csv_importer/static/'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = '/var/www/html/csv_importer/media/'
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
