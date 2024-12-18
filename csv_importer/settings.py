@@ -97,17 +97,6 @@ CACHES = {
 
 WSGI_APPLICATION = 'csv_importer.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -119,44 +108,25 @@ DATABASES = {
     }
 }
 
-# Logging Configuration
-# LOGGING = {
-#     'version': 1,
-#     'disable_existing_loggers': False,
-#     'handlers': {
-#         'file': {
-#             'level': 'DEBUG',
-#             'class': 'logging.FileHandler',
-#             'filename': 'csv_import_errors.log',
-#         },
-#     },
-#     'loggers': {
-#         'import_app': {
-#             'handlers': ['file'],
-#             'level': 'DEBUG',
-#             'propagate': True,
-#         },
-#     },
-# }
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'handlers': {
         'file': {
-            'level': 'DEBUG',  # This captures all log levels: DEBUG, INFO, WARNING, ERROR
+            'level': 'DEBUG', 
             'class': 'logging.FileHandler',
             'filename': os.path.join(BASE_DIR, 'csv_import_errors.log'),
         },
     },
     'loggers': {
-        'import_app': {  # Logger for your app, named 'import_app'
+        'import_app': { 
             'handlers': ['file'],
-            'level': 'DEBUG',  # Captures all log levels
+            'level': 'DEBUG',
             'propagate': True,
         },
-        'django': {  # Capture logs from Django itself (for example, SQL queries, etc.)
+        'django': { 
             'handlers': ['file'],
-            'level': 'INFO',  # Info level for general Django logs (you can change this as needed)
+            'level': 'INFO',
             'propagate': True,
         },
     },
@@ -197,7 +167,6 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-# STATIC_URL = 'static/'
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 
@@ -208,8 +177,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
-# STATIC_URL = '/static/'
-# STATIC_ROOT = '/var/www/html/csv_importer/static/'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = '/var/www/html/csv_importer/media/'

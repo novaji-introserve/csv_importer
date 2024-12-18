@@ -17,14 +17,6 @@ def upload_page(request):
     """Render the HTML page for file upload."""
     return render(request, 'upload.html')
 
-logger.debug("Debug message")
-logger.info("Information message")
-logger.error("Error message")
-    
-# def get(self, request, *args, **kwargs):
-#     # Render the HTML template for GET requests
-#     return render(request, 'core/upload.html')
-
 class CSVImportView(APIView):
     @swagger_auto_schema(
         operation_description="Upload CSV file for data import",
@@ -95,7 +87,7 @@ class CSVImportView(APIView):
             # Create import log
             import_log = ImportLog.objects.create(
                 file_name=file.name,
-                table_name=table_name,  # table_name is now guaranteed to be a valid string
+                table_name=table_name,
                 # created_by=request.user.id,
                 total_records=0
             )

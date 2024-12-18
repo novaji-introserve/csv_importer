@@ -23,7 +23,7 @@ app.conf.task_queues = (
 app.conf.update(
     # Task execution settings
     worker_prefetch_multiplier=1,
-    worker_max_tasks_per_child=10,  # Increased from 1 to prevent frequent worker recycling
+    worker_max_tasks_per_child=10,
     task_acks_late=True,
     task_reject_on_worker_lost=True,
     worker_concurrency=3,
@@ -35,7 +35,7 @@ app.conf.update(
     
     # Result backend settings
     result_backend='redis://localhost:6379/0',
-    result_expires=3600,  # Results expire after 1 hour
+    result_expires=3600,
     
     # Task routing
     task_default_queue='default',
@@ -43,8 +43,8 @@ app.conf.update(
     task_default_routing_key='default',
     
     # Error handling
-    task_soft_time_limit=1800,  # 30 minutes
-    task_time_limit=2100,      # 35 minutes
+    task_soft_time_limit=1800,
+    task_time_limit=2100,
     
     # Performance optimizations
     worker_lost_wait=30,

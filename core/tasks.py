@@ -85,14 +85,14 @@ logger = logging.getLogger(__name__)
 @shared_task(
     bind=True,
     max_retries=3,
-    rate_limit='10/m',  # Increased rate limit
+    rate_limit='10/m', 
     time_limit=1800,
     soft_time_limit=1700,
     acks_late=True,
     reject_on_worker_lost=True,
     autoretry_for=(DatabaseError, OSError),
     retry_backoff=True,
-    retry_backoff_max=300,  # Reduced from 600
+    retry_backoff_max=300, 
     retry_jitter=True
 )
 def process_csv_import(self, file_path: str, table_name: str, import_log_id: int) -> bool:
@@ -164,39 +164,3 @@ def process_csv_import(self, file_path: str, table_name: str, import_log_id: int
             import_log.save()
         return False
     
-    
-
-# @shared_task(
-#     bind=True,
-#     max_retries=3,
-#     rate_limit='2/h',
-#     time_limit=1800  # 30 minutes
-# )
-# def process_csv_import(self: Any, file_path: str, table_name: str, import_log_id: int) -> bool:
-#     """Celery task for processing CSV imports with rate limiting and retries"""
-#     try:
-#         import_log = ImportLog.objects.get(id=import_log_id)
-#         import_log.status = 'processing'
-#         import_log.save()
-
-#         processor = CSVProcessor(table_name)
-        
-#         # Validate table schema
-#         if not processor.validate_table_schema():
-#             raise ValueError(f"Invalid table schema for {table_name}")
-        
-#         # Process file
-#         success = processor.process_file(file_path, import_log_id)
-        
-#         # Update import log
-#         import_log.status = 'completed' if success else 'failed'
-#         import_log.completed_at = timezone.now()
-#         import_log.save()
-        
-#         return success
-
-#     except Exception as e:
-#         logger.error(f"Import task error: {str(e)}")
-#         if self.request.retries < self.max_retries:
-#             self.retry(exc=e, countdown=300)  # Retry after 5 minutes
-#         raise

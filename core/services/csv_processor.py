@@ -255,7 +255,6 @@ class CSVProcessor:
             
             chunk['month_field'] = chunk['month_field'].apply(convert_month)
 
-
         # Handle disbursement_dates only for loan_details table
         if self.table_name == 'loan_details':
             if 'disbursement_dates' in chunk.columns:
@@ -278,8 +277,6 @@ class CSVProcessor:
             else:
                 logger.warning(f"Column 'disbursement_dates' not found in chunk for table {self.table_name}.")
 
-
-        
         # Handle loan type mapping for loan_details table
         if self.table_name == 'loan_details':
             # First ensure the column is renamed properly
@@ -295,7 +292,7 @@ class CSVProcessor:
                     mapped_value = self.LOAN_TYPE_MAPPING.get(cleaned_value)
                     if mapped_value is None:
                         logger.warning(f"Unknown loan type value: {value}")
-                        return 'new_loan'  # default value
+                        return 'new_loan'
                     return mapped_value
 
                 # Apply the mapping
@@ -503,8 +500,8 @@ class CSVProcessor:
                 encoding=encoding,
                 quotechar='"',
                 thousands=',',
-                dtype=str,  # Force everything to string
-                on_bad_lines='warn',  # Log bad lines but continue
+                dtype=str,  
+                on_bad_lines='warn', 
                 low_memory=False
             )
         except Exception as e:
