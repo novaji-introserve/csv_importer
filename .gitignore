@@ -7,3 +7,4 @@ media/
 *.log
 *.python-version
 *.pid
+staticfiles/

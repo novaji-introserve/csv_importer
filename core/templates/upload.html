@@ -4,13 +4,14 @@
     <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
         <h1 class="text-2xl font-bold mb-6">CSV Data Import</h1>
         
-        <form id="uploadForm" class="space-y-6">
+        <form id="uploadForm" class="space-y-6" enctype="multipart/form-data">
+            {% csrf_token %}
             <div>
                 <label class="block text-gray-700 text-sm font-bold mb-2" for="table_name">
-                    Select Table
+                    Category
                 </label>
-                <select id="table_name" name="table_name" class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                    <option value="">Select target table...</option>
+                <select id="table_name" name="table_name" class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                    <option value="">Select category...</option>
                     <option value="civil_servant">Civil Servant</option>
                     <option value="repayment">Repayment</option>
                     <option value="loan_details">Loan Details</option>
@@ -21,88 +22,143 @@
                 <label class="block text-gray-700 text-sm font-bold mb-2" for="file">
                     CSV File (max 2GB)
                 </label>
-                <input type="file" id="file" name="file" accept=".csv, .xlsx, .xls" 
-                       class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                <div class="flex items-center space-x-4">
+                    <input type="file" id="file" name="file" accept=".csv, .xlsx, .xls" 
+                           class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                    <span id="file-name" class="text-sm text-gray-500">No file selected</span>
+                </div>
                 <p class="text-sm text-gray-500 mt-1">Supported format: CSV files up to 2GB</p>
+            </div>
+            
+            <div id="upload-progress" class="hidden">
+                <div class="w-full bg-gray-200 rounded-full h-2.5 mb-2">
+                    <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+                </div>
+                <p id="progress-text" class="text-sm text-gray-600 text-center">Uploading...</p>
             </div>
             
             <div>
                 <button type="submit" 
                         class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                    Start Import
+                    Upload
                 </button>
             </div>
-            
-            <div id="progress" class="hidden">
-                <p class="text-sm text-gray-600">Processing your file...</p>
-                <div class="w-full bg-gray-200 rounded-full h-2.5">
-                    <div class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
-                </div>
-            </div>
         </form>
+    </div>
+
+    <!-- Modal for Upload Status -->
+    <div id="upload-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+        <div class="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full">
+            <div id="modal-content" class="text-center">
+                <div id="modal-icon" class="flex justify-center mb-4">
+                    <!-- Icon will be dynamically inserted -->
+                </div>
+                <h2 id="modal-title" class="text-xl font-bold mb-2"></h2>
+                <p id="modal-message" class="text-gray-600 mb-4"></p>
+                <button id="modal-close" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    Close
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
-document.getElementById('uploadForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const formData = new FormData();
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('uploadForm');
     const fileInput = document.getElementById('file');
-    const tableSelect = document.getElementById('table_name');
-    const progressDiv = document.getElementById('progress');
-    
-    if (!fileInput.files[0]) {
-        alert('Please select a file');
-        return;
-    }
-    
-    if (!tableSelect.value) {
-        alert('Please select a target table');
-        return;
-    }
-    
-    formData.append('file', fileInput.files[0]);
-    formData.append('table_name', tableSelect.value);
-    
-    try {
-        progressDiv.classList.remove('hidden');
-        
-        const response = await fetch('/upload-csv/', {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken')
-            }
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok) {
-            alert('Import initiated successfully. Import ID: ' + data.import_id);
-        } else {
-            alert('Error: ' + data.error);
-        }
-    } catch (error) {
-        alert('Error uploading file: ' + error.message);
-    } finally {
-        progressDiv.classList.add('hidden');
-    }
-});
+    const fileName = document.getElementById('file-name');
+    const progressContainer = document.getElementById('upload-progress');
+    const progressBar = document.getElementById('progress-bar');
+    const progressText = document.getElementById('progress-text');
+    const uploadModal = document.getElementById('upload-modal');
+    const modalIcon = document.getElementById('modal-icon');
+    const modalTitle = document.getElementById('modal-title');
+    const modalMessage = document.getElementById('modal-message');
+    const modalClose = document.getElementById('modal-close');
 
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
+    // File name display
+    fileInput.addEventListener('change', function() {
+        fileName.textContent = this.files.length > 0 ? this.files[0].name : 'No file selected';
+    });
+
+    // Show modal
+    function showModal(type, title, message) {
+        modalIcon.innerHTML = type === 'success' 
+            ? '<svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>'
+            : '<svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>';
+        
+        modalTitle.textContent = title;
+        modalMessage.textContent = message;
+        uploadModal.classList.remove('hidden');
     }
-    return cookieValue;
-}
+
+    // Close modal
+    modalClose.addEventListener('click', function() {
+        uploadModal.classList.add('hidden');
+    });
+
+    // Form submission
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(form);
+        
+        // Validate inputs
+        if (!fileInput.files.length) {
+            showModal('error', 'Upload Failed', 'Please select a file to upload.');
+            return;
+        }
+        
+        const tableSelect = document.getElementById('table_name');
+        if (!tableSelect.value) {
+            showModal('error', 'Upload Failed', 'Please select a target table.');
+            return;
+        }
+
+        // Show progress
+        progressContainer.classList.remove('hidden');
+        progressBar.style.width = '0%';
+        progressText.textContent = 'Preparing upload...';
+
+        try {
+            const response = await fetch('/upload-csv/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                // Track upload progress
+                xhr: (xhr) => {
+                    xhr.upload.onprogress = (event) => {
+                        if (event.lengthComputable) {
+                            const percentComplete = (event.loaded / event.total) * 100;
+                            progressBar.style.width = percentComplete + '%';
+                            progressText.textContent = `Uploading... ${Math.round(percentComplete)}%`;
+                        }
+                    };
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                {% comment %} showModal('success', 'Upload Successful', `Import initiated. Import ID: ${data.import_id}`); {% endcomment %}
+                showModal('success', 'Upload Successful', 'Your data should reflect in the app in a few moment');
+                progressText.textContent = 'Upload complete!';
+                progressBar.style.width = '100%';
+            } else {
+                showModal('error', 'Upload Failed', data.error || 'An unexpected error occurred.');
+            }
+        } catch (error) {
+            showModal('error', 'Upload Failed', error.message);
+        } finally {
+            // Optional: hide progress after a delay
+            setTimeout(() => {
+                progressContainer.classList.add('hidden');
+            }, 3000);
+        }
+    });
+});
 </script>
 {% endblock %}

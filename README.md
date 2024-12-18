@@ -77,6 +77,9 @@ celery -A core.celery inspect scheduled
 celery -A core.celery status
 celery -A core.celery worker --loglevel=info
 
+TO collect static files
+        python manage.py collectstatic
+
 
 
 sudo -i -u postgres
@@ -96,6 +99,7 @@ SET gender =
     END;
 
 
+PREVIOUS SERVICE CONFIG
 
 (.venv) [opc@lcc-431371 csv_importer]$ sudo cat /etc/systemd/system/csv_importer_celery.service
 [Unit]
